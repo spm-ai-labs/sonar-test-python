@@ -1,9 +1,9 @@
 from flask import Flask, request, render_template_string
 import sqlite3
+import logging  # <-- import logging
 
 app = Flask(__name__)
 
-# Crear base de datos en memoria con una tabla simple
 def init_db():
     conn = sqlite3.connect(':memory:')
     cursor = conn.cursor()
@@ -13,6 +13,9 @@ def init_db():
     return conn
 
 conn = init_db()
+
+# Configurar logging básico
+logging.basicConfig(level=logging.INFO, filename='app.log', format='%(asctime)s %(message)s')
 
 @app.route('/')
 def home():
@@ -30,15 +33,15 @@ def login():
     username = request.args.get('username', '')
     password = request.args.get('password', '')
 
+    # Vulnerabilidad añadida: Logging inseguro de credenciales en texto claro
+    logging.info(f'Tentativa de login con usuario: {username}, contraseña: {password}')
+    
     cursor = conn.cursor()
-
-    # Vulnerabilidad: inyección SQL por concatenar directamente inputs sin sanitizar
     query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}';"
     cursor.execute(query)
     user = cursor.fetchone()
 
     if user:
-        # Vulnerabilidad XSS: se muestra directamente el nombre del usuario sin escapar
         return render_template_string(f"<h2>Bienvenido, {username}!</h2>")
     else:
         return "<h2>Credenciales inválidas</h2>"
