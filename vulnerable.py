@@ -1,6 +1,6 @@
 import os
 import pickle
-
+# coment
 # Malas prácticas: hardcoded password, uso de pickle inseguro
 def login(user, password):
     if password == "admin123":  # ← hardcoded password
